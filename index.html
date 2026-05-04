@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CDR Workbench — Wirtschafts- und digitale Ethik</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ef;--bg2:#ede9e2;--white:#ffffff;
+  --ink:#1a1612;--mid:#6b6257;--lt:#b5ada3;
+  --brd:#ddd9d3;--brd2:#c8c3bb;
+  --e:#2a7d4f;--e-bg:#edf7f2;--e-brd:#b5dfc9;
+  --s:#1a5fa8;--s-bg:#e8f1fb;--s-brd:#aecbef;
+  --g:#6b3fa0;--g-bg:#f0eaf9;--g-brd:#c9b3e8;
+  --cdr:#c4762a;--cdr-bg:#fdf3e8;--cdr-brd:#e8c88a;
+  --red:#c0392b;--red-bg:#fdf0ef;
+  --gold:#d4a017;
+  --sh:0 2px 12px rgba(26,22,18,.08);
+  --sh2:0 4px 24px rgba(26,22,18,.14);
+  --fd:'Fraunces',Georgia,serif;
+  --fb:'DM Sans',sans-serif;
+  --fm:'DM Mono',monospace;
+  --r:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px;line-height:1.65;overflow-x:hidden}
+
+/* ── TOPNAV ── */
+#tnav{position:fixed;top:0;left:0;right:0;z-index:800;height:52px;background:var(--white);border-bottom:2px solid var(--ink);display:flex;align-items:center;padding:0 24px;gap:0;box-shadow:var(--sh)}
+.tnav-logo{font-family:var(--fd);font-size:.88rem;font-weight:600;color:var(--ink);margin-right:28px;flex-shrink:0;letter-spacing:-.01em;white-space:nowrap}
+.tnav-logo span{color:var(--cdr)}
+.tnav-tabs{display:flex;overflow-x:auto;scrollbar-width:none;flex:1;gap:0}
+.tnav-tabs::-webkit-scrollbar{display:none}
+.tt{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;padding:0 14px;height:52px;display:flex;align-items:center;gap:6px;cursor:pointer;border-bottom:3px solid transparent;color:var(--lt);transition:all .18s;white-space:nowrap;border-top:none;border-left:none;border-right:none;background:none}
+.tt:hover{color:var(--mid)}
+.tt.active{color:var(--ink);border-bottom-color:var(--cdr);font-weight:500}
+.tt .tnum{width:18px;height:18px;border-radius:50%;background:var(--bg2);display:inline-flex;align-items:center;justify-content:center;font-size:.55rem;flex-shrink:0;transition:all .18s}
+.tt.active .tnum{background:var(--cdr);color:var(--white)}
+.tt.done .tnum{background:var(--e);color:var(--white)}
+.tnav-case{margin-left:auto;font-family:var(--fm);font-size:.58rem;color:var(--mid);white-space:nowrap;flex-shrink:0;border-left:1px solid var(--brd);padding-left:16px}
+
+/* ── PHASE SCREENS ── */
+.scr{display:none;padding-top:72px;min-height:100vh}
+.scr.on{display:block;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.inner{max-width:1040px;margin:0 auto;padding:28px 24px 80px}
+
+/* ── CARDS ── */
+.card{background:var(--white);border:1px solid var(--brd);border-radius:var(--r);padding:24px;box-shadow:var(--sh);margin-bottom:18px}
+.card-hd{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--brd)}
+.card-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.card-title{font-family:var(--fd);font-size:1.15rem;font-weight:600;color:var(--ink);line-height:1.2}
+.card-sub{font-size:.8rem;color:var(--mid);margin-top:3px}
+
+/* ── PHASE HEADER ── */
+.ph{margin-bottom:28px}
+.ph-badge{display:inline-flex;align-items:center;gap:7px;font-family:var(--fm);font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;background:var(--cdr-bg);border:1px solid var(--cdr-brd);color:var(--cdr);padding:4px 10px;border-radius:4px;margin-bottom:12px}
+.ph-title{font-family:var(--fd);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:600;line-height:1.1;color:var(--ink);margin-bottom:7px}
+.ph-title em{font-style:italic;color:var(--cdr)}
+.ph-desc{font-size:.9rem;color:var(--mid);max-width:580px;line-height:1.7}
+
+/* ── INPUTS ── */
+.inp{width:100%;background:var(--bg);border:1.5px solid var(--brd);border-radius:6px;padding:10px 13px;font-family:var(--fb);font-size:.88rem;color:var(--ink);transition:border-color .18s;resize:vertical}
+.inp:focus{outline:none;border-color:var(--cdr);background:var(--white)}
+.inp::placeholder{color:var(--lt)}
+.lbl{font-family:var(--fm);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-bottom:5px;display:block}
+.frow{margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* ── BUTTONS ── */
+.btn{font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:10px 22px;border-radius:6px;cursor:pointer;border:2px solid;transition:all .15s;display:inline-block;background:none;font-weight:500}
+.bp{background:var(--ink);color:var(--white);border-color:var(--ink)}.bp:hover{background:#333}
+.bc{background:var(--cdr);color:var(--white);border-color:var(--cdr)}.bc:hover{opacity:.88}
+.be{background:var(--e);color:var(--white);border-color:var(--e)}.be:hover{opacity:.88}
+.bg2{color:var(--ink);border-color:var(--brd2)}.bg2:hover{border-color:var(--ink)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+/* ── ESG BADGES ── */
+.ebadge{display:inline-flex;align-items:center;gap:5px;font-family:var(--fm);font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:4px;font-weight:500}
+.eb-e{background:var(--e-bg);border:1px solid var(--e-brd);color:var(--e)}
+.eb-s{background:var(--s-bg);border:1px solid var(--s-brd);color:var(--s)}
+.eb-g{background:var(--g-bg);border:1px solid var(--g-brd);color:var(--g)}
+.eb-cdr{background:var(--cdr-bg);border:1px solid var(--cdr-brd);color:var(--cdr)}
+
+/* ── CASE CARDS ── */
+.case-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:18px}
+.cc{background:var(--white);border:2px solid var(--brd);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.cc:hover{border-color:var(--cdr);box-shadow:var(--sh2);transform:translateY(-2px)}
+.cc.sel{border-color:var(--cdr);background:var(--cdr-bg)}
+.cc-num{font-family:var(--fd);font-size:2.5rem;color:var(--bg2);line-height:1;margin-bottom:6px;font-weight:600}
+.cc.sel .cc-num{color:var(--cdr-brd)}
+.cc-title{font-family:var(--fd);font-size:.95rem;font-weight:600;color:var(--ink);margin-bottom:5px;line-height:1.3}
+.cc-desc{font-size:.75rem;color:var(--mid);line-height:1.5;margin-bottom:10px}
+.cc-tags{display:flex;gap:5px;flex-wrap:wrap}
+
+/* ── DOUBLE MATERIALITY MATRIX ── */
+.dm-wrap{position:relative;width:100%;padding-top:min(100%,500px);margin-bottom:14px}
+#dmCanvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;border-radius:8px;touch-action:none}
+.dm-legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.dm-leg-item{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--mid)}
+.dm-leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+
+/* ── RISK RADAR ── */
+.radar-wrap{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+#radarCanvas{background:var(--bg);border-radius:var(--r);border:1px solid var(--brd);flex-shrink:0}
+.radar-controls{flex:1;min-width:220px;display:flex;flex-direction:column;gap:10px}
+.rc-row{display:flex;align-items:center;gap:10px}
+.rc-lbl{font-family:var(--fm);font-size:.6rem;flex:1;color:var(--ink)}
+.rc-slider{flex:2;-webkit-appearance:none;height:5px;border-radius:3px;background:var(--brd);outline:none;cursor:pointer}
+.rc-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--cdr);cursor:pointer;border:2px solid var(--white);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.rc-val{font-family:var(--fd);font-size:.9rem;font-weight:600;color:var(--cdr);width:18px;text-align:right;flex-shrink:0}
+.radar-risk-level{display:inline-flex;align-items:center;gap:6px;font-family:var(--fm);font-size:.6rem;padding:4px 10px;border-radius:4px;margin-top:8px}
+
+/* ── POLICY CANVAS ── */
+.canvas-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto auto;gap:10px}
+.canvas-cell{background:var(--white);border:2px solid var(--brd);border-radius:8px;padding:14px;min-height:130px;transition:border-color .18s}
+.canvas-cell:focus-within{border-color:var(--cdr)}
+.canvas-cell.span2{grid-column:span 2}
+.cc-hd{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.cc-hd .cico{font-size:.9rem}
+textarea.canvas-inp{width:100%;height:80px;border:none;background:transparent;font-family:var(--fb);font-size:.82rem;color:var(--ink);resize:none;outline:none;line-height:1.55}
+textarea.canvas-inp::placeholder{color:var(--lt)}
+
+/* ── KPI BUILDER ── */
+.kpi-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.kpi-num{font-family:var(--fd);font-size:1rem;font-weight:600;color:var(--lt);flex-shrink:0;width:20px}
+.kpi-inp{flex:1}
+.kpi-add{font-family:var(--fm);font-size:.58rem;color:var(--cdr);cursor:pointer;padding:6px 12px;border:1px dashed var(--cdr-brd);border-radius:4px;background:var(--cdr-bg);text-align:center;transition:all .15s}
+.kpi-add:hover{background:var(--cdr);color:var(--white)}
+
+/* ── STRESS TEST ── */
+.st-q{background:var(--white);border:1px solid var(--brd);border-radius:8px;padding:18px 20px;margin-bottom:12px;border-left:4px solid var(--brd2);transition:border-left-color .2s}
+.st-q:focus-within{border-left-color:var(--red)}
+.st-qnum{font-family:var(--fm);font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--lt);margin-bottom:6px}
+.st-qtext{font-family:var(--fd);font-size:.95rem;font-weight:600;color:var(--ink);margin-bottom:10px;line-height:1.4}
+.st-sub{font-size:.78rem;color:var(--mid);margin-bottom:10px;line-height:1.5}
+
+/* ── BOARD DECISION ── */
+.bd-item{background:var(--white);border:1px solid var(--brd);border-radius:8px;padding:18px;margin-bottom:10px;display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:flex-start}
+.bd-num{width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--white);font-family:var(--fd);font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bd-q{font-family:var(--fd);font-size:.9rem;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.35}
+.bd-hint{font-size:.76rem;color:var(--mid);margin-bottom:8px;line-height:1.5}
+.bd-redline{border:2px solid var(--red);background:var(--red-bg)}
+.bd-redline .bd-num{background:var(--red)}
+
+/* ── PRESENTATION MODE ── */
+#presMode{display:none;position:fixed;inset:0;z-index:2000;background:var(--ink);overflow-y:auto;padding:48px 40px}
+.pres-inner{max-width:900px;margin:0 auto;color:var(--white)}
+.pres-close{position:fixed;top:16px;right:20px;background:none;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.7);font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;padding:8px 14px;border-radius:4px;cursor:pointer;text-transform:uppercase}
+.pres-case-title{font-family:var(--fd);font-size:clamp(2rem,5vw,3.5rem);font-weight:300;line-height:1;margin-bottom:6px}
+.pres-case-title strong{color:var(--cdr)}
+.pres-section{margin-bottom:36px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.1)}
+.pres-section-hd{font-family:var(--fm);font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:12px}
+.pres-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pres-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:16px}
+.pres-box-hd{font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px}
+.pres-text{font-size:.88rem;color:rgba(255,255,255,.75);line-height:1.65;white-space:pre-wrap}
+.pres-kpi-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.pres-kpi-dot{width:8px;height:8px;border-radius:50%;background:var(--cdr);flex-shrink:0}
+.pres-rdline{background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);border-radius:6px;padding:14px 16px;margin-top:10px}
+
+/* ── PROGRESS BAR ── */
+.prog-bar{position:fixed;top:52px;left:0;right:0;height:3px;background:var(--bg2);z-index:799}
+.prog-fill{height:100%;background:var(--cdr);transition:width .4s ease}
+
+/* ── SAVE INDICATOR ── */
+#saveInd{position:fixed;bottom:16px;right:16px;background:var(--e);color:var(--white);font-family:var(--fm);font-size:.56rem;letter-spacing:.1em;padding:6px 12px;border-radius:4px;opacity:0;transition:opacity .3s;z-index:900}
+
+/* ── LITERATURE ── */
+.lit-cluster-hd{font-family:var(--fm);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cdr);margin:28px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--cdr-brd)}
+.lit-entry{background:var(--white);border:1px solid var(--brd);border-radius:8px;padding:18px 20px;margin-bottom:10px;border-left:4px solid var(--brd2)}
+.lit-entry.cdr{border-left-color:var(--cdr)}
+.lit-entry.e{border-left-color:var(--e)}
+.lit-entry.s{border-left-color:var(--s)}
+.lit-entry.g{border-left-color:var(--g)}
+.lit-apa{font-size:.84rem;color:var(--ink);line-height:1.6;margin-bottom:6px}
+.lit-apa em{font-style:italic}
+.lit-note{font-size:.76rem;color:var(--mid);line-height:1.6;font-style:italic;border-top:1px solid var(--brd);padding-top:7px;margin-top:6px}
+.lit-doi{font-family:var(--fm);font-size:.6rem;color:var(--s);margin-top:5px}
+.lit-doi a{color:var(--s)}
+
+/* ── WELCOME ── */
+.welcome-hero{background:var(--ink);border-radius:var(--r);padding:36px 40px;margin-bottom:24px;position:relative;overflow:hidden}
+.welcome-hero::before{content:'CDR ESG';position:absolute;right:-10px;top:-20px;font-family:var(--fd);font-size:8rem;font-weight:700;color:rgba(255,255,255,.04);line-height:1;pointer-events:none}
+.welcome-h1{font-family:var(--fd);font-size:clamp(2rem,5vw,3.2rem);font-weight:600;color:var(--white);line-height:1.05;margin-bottom:8px}
+.welcome-h1 em{font-style:italic;color:var(--cdr)}
+.welcome-sub{font-size:.9rem;color:rgba(255,255,255,.6);max-width:560px;line-height:1.7;margin-bottom:22px}
+.welcome-meta{font-family:var(--fm);font-size:.58rem;color:rgba(255,255,255,.3);letter-spacing:.12em}
+.concept-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px;margin-bottom:24px}
+.concept-card{background:var(--white);border:1px solid var(--brd);border-radius:8px;padding:16px;position:relative}
+.concept-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:8px 0 0 8px}
+.concept-card.cdr::before{background:var(--cdr)}
+.concept-card.e::before{background:var(--e)}
+.concept-card.s::before{background:var(--s)}
+.concept-card.g::before{background:var(--g)}
+.concept-card.csrd::before{background:var(--gold)}
+.concept-abbr{font-family:var(--fd);font-size:1.5rem;font-weight:600;margin-bottom:4px}
+.concept-name{font-family:var(--fm);font-size:.58rem;letter-spacing:.08em;color:var(--mid);margin-bottom:6px}
+.concept-def{font-size:.76rem;color:var(--mid);line-height:1.5}
+
+/* TOAST */
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--white);font-family:var(--fm);font-size:.62rem;letter-spacing:.08em;padding:10px 20px;border-radius:6px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+
+@media(max-width:600px){.inner{padding:16px 14px 70px}.canvas-grid{grid-template-columns:1fr}.pres-grid{grid-template-columns:1fr}.radar-wrap{flex-direction:column}.welcome-hero{padding:24px 20px}}
+</style>
+</head>
+<body>
+
+<div id="tnav">
+  <span class="tnav-logo">CDR <span>Workbench</span></span>
+  <div class="tnav-tabs">
+    <button class="tt active" data-tab="0" onclick="gotoTab(0)"><span class="tnum">◎</span> Start</button>
+    <button class="tt" data-tab="1" onclick="gotoTab(1)"><span class="tnum">1</span> Fall<span style="font-size:.48rem;color:var(--lt);margin-left:4px">~10 min</span></button>
+    <button class="tt" data-tab="2" onclick="gotoTab(2)"><span class="tnum">2</span> Framing<span style="font-size:.48rem;color:var(--lt);margin-left:4px">~20 min</span></button>
+    <button class="tt" data-tab="3" onclick="gotoTab(3)"><span class="tnum">3</span> Wesentlichkeit<span style="font-size:.48rem;color:var(--lt);margin-left:4px">~25 min</span></button>
+    <button class="tt" data-tab="4" onclick="gotoTab(4)"><span class="tnum">4</span> Risk Radar<span style="font-size:.48rem;color:var(--lt);margin-left:4px">~20 min</span></button>
+    <button class="tt" data-tab="5" onclick="gotoTab(5)"><span class="tnum">5</span> Policy Canvas<span style="font-size:.48rem;color:var(--lt);margin-left:4px">~30 min</span></button>
+    <button class="tt" data-tab="6" onclick="gotoTab(6)"><span class="tnum">6</span> Stress-Test<span style="font-size:.48rem;color:var(--lt);margin-left:4px">~15 min</span></button>
+    <button class="tt" data-tab="7" onclick="gotoTab(7)"><span class="tnum">7</span> Board<span style="font-size:.48rem;color:var(--lt);margin-left:4px">~35 min</span></button>
+    <button class="tt" data-tab="8" onclick="gotoTab(8)"><span class="tnum">◈</span> Literatur</button>
+  </div>
+  <span class="tnav-case" id="tnavCase">Kein Fall gewählt</span>
+</div>
+<div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+<div id="saveInd">✓ Gespeichert</div>
+<div id="toast"></div>
+
+<!-- ══════════════════════ TAB 0: START ══════════════════════ -->
+<div class="scr on" id="tab0">
+<div class="inner">
+  <div class="welcome-hero">
+    <div class="welcome-h1">Corporate Digital<br><em>Responsibility</em> &amp; ESG</div>
+    <div class="welcome-sub">Interaktive Workbench für die Analyse digitaler Praxisfälle — von der Problemdiagnose bis zum Governance-Modell. Arbeite dich durch alle sieben Phasen und entwickle ein belastbares CDR/ESG-Steuerungsmodell.</div>
+    <div class="welcome-meta">Wirtschafts- und digitale Ethik · Prof. Thomas Petzold Ph.D.</div>
+  </div>
+
+  <div style="font-family:var(--fm);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);margin-bottom:12px">◈ Begriffe auf einen Blick</div>
+  <div class="concept-row">
+    <div class="concept-card cdr">
+      <div class="concept-abbr" style="color:var(--cdr)">CDR</div>
+      <div class="concept-name">Corporate Digital Responsibility</div>
+      <div class="concept-def">Wie nutzt ein Unternehmen digitale Technologien verantwortlich? Umfasst Daten, KI, Plattformen, Automatisierung.</div>
+    </div>
+    <div class="concept-card e">
+      <div class="concept-abbr" style="color:var(--e)">E</div>
+      <div class="concept-name">Environmental</div>
+      <div class="concept-def">Umwelt, Energie, Infrastruktur, Ressourcen — auch digitale Infrastruktur kann ein E-Thema sein.</div>
+    </div>
+    <div class="concept-card s">
+      <div class="concept-abbr" style="color:var(--s)">S</div>
+      <div class="concept-name">Social</div>
+      <div class="concept-def">Menschen, Arbeit, Konsument:innen, Fairness, Rechte — Datenpraktiken sind oft S-Themen.</div>
+    </div>
+    <div class="concept-card g">
+      <div class="concept-abbr" style="color:var(--g)">G</div>
+      <div class="concept-name">Governance</div>
+      <div class="concept-def">Steuerung, Kontrolle, Zuständigkeiten, Aufsicht, Rechenschaft. KI kann ein G-Thema sein.</div>
+    </div>
+    <div class="concept-card csrd">
+      <div class="concept-abbr" style="color:var(--gold)">CSRD</div>
+      <div class="concept-name">Reporting-Pflicht</div>
+      <div class="concept-def">EU-Rahmen: regelt, <em>dass</em> Unternehmen zu Nachhaltigkeit berichten müssen. Macht digitale Praktiken prüfbar.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-icon" style="background:var(--cdr-bg);font-size:1.3rem">⚖️</div>
+      <div><div class="card-title">Doppelte Wesentlichkeit</div><div class="card-sub">Das Kernkonzept dieser Sitzung</div></div>
+    </div>
+    <div class="grid2">
+      <div style="background:var(--s-bg);border:1px solid var(--s-brd);border-radius:8px;padding:14px">
+        <div class="ebadge eb-s" style="margin-bottom:8px">Financial Materiality</div>
+        <div style="font-size:.82rem;color:var(--mid);line-height:1.6">Wie wirken Nachhaltigkeits- und Verantwortungsthemen <strong>auf das Unternehmen</strong>? Risiken, Kosten, Reputation, Haftung.</div>
+      </div>
+      <div style="background:var(--g-bg);border:1px solid var(--g-brd);border-radius:8px;padding:14px">
+        <div class="ebadge eb-g" style="margin-bottom:8px">Impact Materiality</div>
+        <div style="font-size:.82rem;color:var(--mid);line-height:1.6">Wie wirkt das Unternehmen <strong>auf Menschen, Gesellschaft und Umwelt</strong>? Wer wird betroffen, auch ohne Rückwirkung?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-icon" style="background:var(--e-bg)">🗺️</div>
+      <div><div class="card-title">Dein Workflow</div><div class="card-sub">7 Phasen — von der Diagnose zum Governance-Modell</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:9px">
+      <div style="background:var(--bg);border:1px solid var(--brd);border-radius:7px;padding:12px;display:flex;gap:10px;align-items:flex-start">
+        <span style="width:24px;height:24px;background:var(--ink);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.55rem;flex-shrink:0">1</span>
+        <div><div style="font-family:var(--fd);font-size:.85rem;font-weight:600;color:var(--ink)">📂 Fall wählen</div><div style="font-size:.72rem;color:var(--mid);margin-top:2px">Einen der 8 Fälle auswählen und verstehen</div></div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--brd);border-radius:7px;padding:12px;display:flex;gap:10px;align-items:flex-start">
+        <span style="width:24px;height:24px;background:var(--ink);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.55rem;flex-shrink:0">2</span>
+        <div><div style="font-family:var(--fd);font-size:.85rem;font-weight:600;color:var(--ink)">🔍 Framing Sprint</div><div style="font-size:.72rem;color:var(--mid);margin-top:2px">Den Fall in 7 Schritten analysieren</div></div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--brd);border-radius:7px;padding:12px;display:flex;gap:10px;align-items:flex-start">
+        <span style="width:24px;height:24px;background:var(--ink);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.55rem;flex-shrink:0">3</span>
+        <div><div style="font-family:var(--fd);font-size:.85rem;font-weight:600;color:var(--ink)">📊 Wesentlichkeit</div><div style="font-size:.72rem;color:var(--mid);margin-top:2px">Double-Materiality-Matrix ausfüllen</div></div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--brd);border-radius:7px;padding:12px;display:flex;gap:10px;align-items:flex-start">
+        <span style="width:24px;height:24px;background:var(--ink);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.55rem;flex-shrink:0">4</span>
+        <div><div style="font-family:var(--fd);font-size:.85rem;font-weight:600;color:var(--ink)">🎯 Risk Radar</div><div style="font-size:.72rem;color:var(--mid);margin-top:2px">CDR-Risiken nach 7 Dimensionen bewerten</div></div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--brd);border-radius:7px;padding:12px;display:flex;gap:10px;align-items:flex-start">
+        <span style="width:24px;height:24px;background:var(--ink);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.55rem;flex-shrink:0">5</span>
+        <div><div style="font-family:var(--fd);font-size:.85rem;font-weight:600;color:var(--ink)">🏗️ Policy Canvas</div><div style="font-size:.72rem;color:var(--mid);margin-top:2px">Governance-Modell entwickeln</div></div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--brd);border-radius:7px;padding:12px;display:flex;gap:10px;align-items:flex-start">
+        <span style="width:24px;height:24px;background:var(--ink);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.55rem;flex-shrink:0">6</span>
+        <div><div style="font-family:var(--fd);font-size:.85rem;font-weight:600;color:var(--ink)">⚡ Stress-Test</div><div style="font-size:.72rem;color:var(--mid);margin-top:2px">Die eigene Lösung angreifen</div></div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--brd);border-radius:7px;padding:12px;display:flex;gap:10px;align-items:flex-start">
+        <span style="width:24px;height:24px;background:var(--ink);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.55rem;flex-shrink:0">7</span>
+        <div><div style="font-family:var(--fd);font-size:.85rem;font-weight:600;color:var(--ink)">🔔 Board-Entscheidung</div><div style="font-size:.72rem;color:var(--mid);margin-top:2px">7 Punkte, klare Beschlüsse</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn bc" onclick="gotoTab(1)">Los geht's — Fall wählen →</button>
+    <button class="btn bg2" onclick="loadFromStorage()">Letzten Stand laden</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════ TAB 1: FALL ══════════════════════ -->
+<div class="scr" id="tab1">
+<div class="inner">
+  <div class="ph">
+    <div class="ph-badge">◈ Schritt 1 von 7</div>
+    <div class="ph-title">Wählt euren <em>Fall</em></div>
+    <div class="ph-desc">Acht Fälle aus digitalen Märkten — bewusst komplex, bewusst nicht eindeutig. Jeder enthält eine wirtschaftliche Logik und eine normative Spannung.</div>
+  </div>
+  <div class="case-grid" id="caseGrid"></div>
+  <div id="caseDetail" style="display:none;margin-top:20px"></div>
+  <div class="btn-row" id="caseNextRow" style="display:none">
+    <button class="btn bc" onclick="gotoTab(2)">Weiter: Framing Sprint →</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════ TAB 2: FRAMING ══════════════════════ -->
+<div class="scr" id="tab2">
+<div class="inner">
+  <div class="ph">
+    <div class="ph-badge">◈ Schritt 2 von 7 — Framing Sprint</div>
+    <div class="ph-title">Den Fall <em>durchleuchten</em></div>
+    <div class="ph-desc">Sieben Fragen, die euren Fall schärfer machen. Die Lösung darf noch nicht kommen — erst muss klar sein, was die eigentliche Managementfrage ist.</div>
+  </div>
+  <div id="framingCase" style="margin-bottom:18px"></div>
+  <div class="card">
+    <div class="card-hd"><div class="card-icon" style="background:#f0f0f0">🔍</div><div><div class="card-title">Case Framing Sprint</div><div class="card-sub">Beantwortet alle 7 Fragen — präzise und ohne vorzeitige Lösungen</div></div></div>
+    <div class="frow">
+      <label class="lbl" for="f1">Frage 1 — Welche digitale Praxis steht im Zentrum?</label>
+      <div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;font-style:italic">Beschreibt die konkrete Praxis in 2–3 Sätzen — ohne Wertung.</div>
+      <textarea class="inp" id="f1" rows="3" placeholder="…" oninput="autoSave()"></textarea>
+    </div>
+    <div class="frow">
+      <label class="lbl" for="f2">Frage 2 — Welche Geschäftslogik macht diese Praxis attraktiv?</label>
+      <div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;font-style:italic">Warum macht ein Unternehmen das? Was sind die wirtschaftlichen Anreize?</div>
+      <textarea class="inp" id="f2" rows="3" placeholder="…" oninput="autoSave()"></textarea>
+    </div>
+    <div class="frow">
+      <label class="lbl" for="f3">Frage 3 — Wer profitiert unmittelbar — und wie?</label>
+      <div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;font-style:italic">Nennt konkrete Gruppen (Unternehmen, Nutzer:innen, Investor:innen…) und den jeweiligen Nutzen.</div>
+      <textarea class="inp" id="f3" rows="3" placeholder="…" oninput="autoSave()"></textarea>
+    </div>
+    <div class="frow">
+      <label class="lbl" for="f4">Frage 4 — Wer trägt Risiken oder Lasten — auch indirekt?</label>
+      <div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;font-style:italic">Wer zahlt den Preis? Welche Gruppen sind belastet, ohne unmittelbar einbezogen zu sein?</div>
+      <textarea class="inp" id="f4" rows="3" placeholder="…" oninput="autoSave()"></textarea>
+    </div>
+    <div class="frow">
+      <label class="lbl" for="f5">Frage 5 — Welche Informationen fehlen euch noch?</label>
+      <div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;font-style:italic">Was müsst ihr wissen, um eine gute Entscheidung zu treffen? Was ist unklar?</div>
+      <textarea class="inp" id="f5" rows="3" placeholder="…" oninput="autoSave()"></textarea>
+    </div>
+    <div class="frow">
+      <label class="lbl" for="f6">Frage 6 — Welche Zielkonflikte sind sichtbar?</label>
+      <div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;font-style:italic">Effizienz vs. Fairness? Innovation vs. Verifikation? Nennt mindestens zwei Spannungsfelder.</div>
+      <textarea class="inp" id="f6" rows="3" placeholder="…" oninput="autoSave()"></textarea>
+    </div>
+    <div class="frow">
+      <label class="lbl" for="f7">Frage 7 — Warum ist das ein Governance-Fall — und nicht nur ein Ethik-Wunsch?</label>
+      <div style="font-size:.76rem;color:var(--mid);margin-bottom:6px;font-style:italic">Was macht diesen Fall zu einer Organisations- und Steuerungsfrage, nicht nur zu einer moralischen Frage?</div>
+      <textarea class="inp" id="f7" rows="3" placeholder="…" oninput="autoSave()"></textarea>
+    </div>
+    <div style="background:var(--cdr-bg);border:1px solid var(--cdr-brd);border-radius:8px;padding:14px;margin-top:6px">
+      <label class="lbl" for="fconclusion">Schlussformel — „Die eigentliche Managementfrage lautet …"</label>
+      <textarea class="inp" id="fconclusion" rows="2" placeholder="Die eigentliche Managementfrage lautet …" oninput="autoSave()"></textarea>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn bc" onclick="gotoTab(3)">Weiter: Wesentlichkeit →</button>
+    <button class="btn bg2" onclick="gotoTab(1)">← Zurück</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════ TAB 3: WESENTLICHKEIT ══════════════════════ -->
+<div class="scr" id="tab3">
+<div class="inner">
+  <div class="ph">
+    <div class="ph-badge">◈ Schritt 3 von 7 — Double Materiality</div>
+    <div class="ph-title">Doppelte <em>Wesentlichkeit</em></div>
+    <div class="ph-desc">Platziert euren Fall im Matrix-Feld. Horizontal: wie stark ist das Unternehmen betroffen? Vertikal: wie stark betrifft das Unternehmen andere? Klickt oder zieht den Punkt.</div>
+  </div>
+  <div class="grid2" style="align-items:start">
+    <div>
+      <div class="card">
+        <div class="card-hd"><div class="card-icon" style="background:var(--s-bg)">📊</div><div><div class="card-title">Materiality Matrix</div><div class="card-sub">Klickt in die Matrix, um euren Fall einzuordnen</div></div></div>
+        <div class="dm-wrap"><canvas id="dmCanvas"></canvas></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:.75rem">
+          <div style="background:var(--s-bg);border:1px solid var(--s-brd);border-radius:6px;padding:10px"><strong style="display:block;color:var(--s);font-family:var(--fm);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">→ Finanzielle Wesentlichkeit</strong>Einfluss auf Umsatz, Kosten, Haftung, Reputation des Unternehmens</div>
+          <div style="background:var(--g-bg);border:1px solid var(--g-brd);border-radius:6px;padding:10px"><strong style="display:block;color:var(--g);font-family:var(--fm);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">↑ Impact-Wesentlichkeit</strong>Einfluss auf Stakeholder, Gesellschaft, Umwelt durch das Unternehmen</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-icon" style="background:var(--cdr-bg)">🏷️</div><div><div class="card-title">ESG-Verortung</div><div class="card-sub">Ordnet die Wirkungen eures Falls den ESG-Dimensionen zu</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="background:#e8f7f0;border-radius:7px;padding:12px">
+            <div style="font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--e);margin-bottom:6px">Environmental</div>
+            <div style="font-size:.72rem;color:var(--mid);margin-bottom:7px">Umweltwirkungen, Ressourcen, Infrastruktur</div>
+            <textarea class="inp" id="esg_e" rows="2" placeholder="Relevante Wirkungen in dieser Dimension …" oninput="autoSave()" style="background:rgba(255,255,255,.7)"></textarea>
+          </div>
+          <div style="background:#e8f2fb;border-radius:7px;padding:12px">
+            <div style="font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--s);margin-bottom:6px">Social</div>
+            <div style="font-size:.72rem;color:var(--mid);margin-bottom:7px">Menschen, Fairness, Rechte, Arbeit, Konsument:innen</div>
+            <textarea class="inp" id="esg_s" rows="2" placeholder="Relevante Wirkungen in dieser Dimension …" oninput="autoSave()" style="background:rgba(255,255,255,.7)"></textarea>
+          </div>
+          <div style="background:#f2eaf9;border-radius:7px;padding:12px">
+            <div style="font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--g);margin-bottom:6px">Governance</div>
+            <div style="font-size:.72rem;color:var(--mid);margin-bottom:7px">Steuerung, Zuständigkeiten, Kontrolle, Rechenschaft</div>
+            <textarea class="inp" id="esg_g" rows="2" placeholder="Relevante Wirkungen in dieser Dimension …" oninput="autoSave()" style="background:rgba(255,255,255,.7)"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-hd"><div class="card-icon" style="background:var(--bg2)">🔬</div><div><div class="card-title">Qualität der Einschätzung</div><div class="card-sub">Kennzeichnet, worauf eure Einschätzungen basieren</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="border:1px solid var(--brd);border-radius:7px;padding:12px;background:var(--white)">
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--mid);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">📈 datenbasiert</div>
+            <div style="font-size:.74rem;color:var(--mid);margin-bottom:7px">Auf belastbaren Daten oder Fakten gestützt</div>
+            <textarea class="inp" id="qual_datenbasiert" rows="2" placeholder="Was fällt unter diese Kategorie?" oninput="autoSave()" style="font-size:.8rem"></textarea>
+          </div>
+          <div style="border:1px solid var(--brd);border-radius:7px;padding:12px;background:var(--white)">
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--mid);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">💭 annahmenbasiert</div>
+            <div style="font-size:.74rem;color:var(--mid);margin-bottom:7px">Plausible Annahme, aber nicht belegbar</div>
+            <textarea class="inp" id="qual_annahmenbasiert" rows="2" placeholder="Was fällt unter diese Kategorie?" oninput="autoSave()" style="font-size:.8rem"></textarea>
+          </div>
+          <div style="border:1px solid var(--brd);border-radius:7px;padding:12px;background:var(--white)">
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--mid);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">❓ unsicher</div>
+            <div style="font-size:.74rem;color:var(--mid);margin-bottom:7px">Wir wissen es nicht — offene Frage</div>
+            <textarea class="inp" id="qual_unsicher" rows="2" placeholder="Was fällt unter diese Kategorie?" oninput="autoSave()" style="font-size:.8rem"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);margin-bottom:10px">Primäre ESG-Kategorie</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <label style="cursor:pointer"><input type="radio" name="esgPrimary" value="E" onchange="autoSave()" style="margin-right:4px"><span class="ebadge eb-e">E</span></label>
+          <label style="cursor:pointer"><input type="radio" name="esgPrimary" value="S" onchange="autoSave()" style="margin-right:4px"><span class="ebadge eb-s">S</span></label>
+          <label style="cursor:pointer"><input type="radio" name="esgPrimary" value="G" onchange="autoSave()" style="margin-right:4px"><span class="ebadge eb-g">G</span></label>
+          <label style="cursor:pointer"><input type="radio" name="esgPrimary" value="E+S" onchange="autoSave()" style="margin-right:4px"><span class="ebadge eb-e">E+S</span></label>
+          <label style="cursor:pointer"><input type="radio" name="esgPrimary" value="S+G" onchange="autoSave()" style="margin-right:4px"><span class="ebadge eb-s">S+G</span></label>
+          <label style="cursor:pointer"><input type="radio" name="esgPrimary" value="E+S+G" onchange="autoSave()" style="margin-right:4px"><span class="ebadge eb-g">E+S+G</span></label>
+        </div>
+        <div class="frow">
+          <label class="lbl">Begründung der Einordnung</label>
+          <textarea class="inp" id="esgReason" rows="3" placeholder="Warum diese Einordnung? Was sind die wichtigsten Wirkungspfade?" oninput="autoSave()"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn bc" onclick="gotoTab(4)">Weiter: Risk Radar →</button>
+    <button class="btn bg2" onclick="gotoTab(2)">← Zurück</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════ TAB 4: RISK RADAR ══════════════════════ -->
+<div class="scr" id="tab4">
+<div class="inner">
+  <div class="ph">
+    <div class="ph-badge">◈ Schritt 4 von 7 — CDR Risk Radar</div>
+    <div class="ph-title">CDR <em>Risk Radar</em></div>
+    <div class="ph-desc">Bewertet euren Fall entlang von sieben Risikodimensionen. Das Ergebnis zeigt euer Risikoprofil — analog zum realen CDR/CSR Risk Radar-Ansatz.</div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><div class="card-icon" style="background:var(--red-bg)">🎯</div><div><div class="card-title">Risikoprofil eures Falls</div><div class="card-sub">1 = niedriges Risiko / gute Governance-Reife · 5 = hohes Risiko / keine Steuerung</div></div></div>
+    <div class="radar-wrap">
+      <canvas id="radarCanvas" width="300" height="300"></canvas>
+      <div class="radar-controls" id="radarControls"></div>
+    </div>
+    <div id="radarSummary" style="margin-top:14px"></div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><div class="card-icon" style="background:var(--bg2)">📝</div><div><div class="card-title">Risikobegründungen</div><div class="card-sub">Begründet kurz, warum ihr die jeweilige Einstufung vorgenommen habt</div></div></div>
+    <div id="radarReasons"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn bc" onclick="gotoTab(5)">Weiter: Policy Canvas →</button>
+    <button class="btn bg2" onclick="gotoTab(3)">← Zurück</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════ TAB 5: POLICY CANVAS ══════════════════════ -->
+<div class="scr" id="tab5">
+<div class="inner">
+  <div class="ph">
+    <div class="ph-badge">◈ Schritt 5 von 7 — Policy Canvas</div>
+    <div class="ph-title">Governance-Modell <em>entwickeln</em></div>
+    <div class="ph-desc">Entwickelt euer CDR/ESG-Steuerungsmodell. Das Modell muss wirtschaftlich plausibel, governance-fähig und öffentlich verteidigbar sein.</div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><div class="card-icon" style="background:var(--g-bg)">🏗️</div><div><div class="card-title">CDR/ESG Policy Canvas</div><div class="card-sub">Füllt alle Felder aus — inspiriert am Business Model Canvas-Format</div></div></div>
+    <div class="canvas-grid">
+      <div class="canvas-cell" style="border-color:var(--cdr-brd)">
+        <div class="cc-hd" style="color:var(--cdr)"><span class="cico">📋</span> Leitlinie</div>
+        <textarea class="canvas-inp" id="cv_policy" placeholder="Welche Policy / Leitlinie gilt für diese Praxis?" oninput="autoSave()"></textarea>
+      </div>
+      <div class="canvas-cell" style="border-color:var(--g-brd)">
+        <div class="cc-hd" style="color:var(--g)"><span class="cico">👤</span> Verantwortliche Rolle</div>
+        <textarea class="canvas-inp" id="cv_role" placeholder="Wer ist verantwortlich? Welche Rolle / Funktion?" oninput="autoSave()"></textarea>
+      </div>
+      <div class="canvas-cell" style="border-color:var(--s-brd)">
+        <div class="cc-hd" style="color:var(--s)"><span class="cico">🔍</span> Audit &amp; Kontrolle</div>
+        <textarea class="canvas-inp" id="cv_audit" placeholder="Wie wird geprüft? Wer führt das Audit durch?" oninput="autoSave()"></textarea>
+      </div>
+      <div class="canvas-cell" style="border-color:var(--e-brd)">
+        <div class="cc-hd" style="color:var(--e)"><span class="cico">⬆️</span> Eskalationsweg</div>
+        <textarea class="canvas-inp" id="cv_esc" placeholder="Wie wird eskaliert? An wen, unter welchen Bedingungen?" oninput="autoSave()"></textarea>
+      </div>
+      <div class="canvas-cell span2" style="border-color:var(--gold)">
+        <div class="cc-hd" style="color:var(--gold)"><span class="cico">👥</span> Stakeholder-Feedback-Kanal</div>
+        <textarea class="canvas-inp" id="cv_stake" placeholder="Wie werden Betroffene einbezogen? Welche Kanäle gibt es für Feedback und Widerspruch?" oninput="autoSave()" style="height:65px"></textarea>
+      </div>
+      <div class="canvas-cell span2" style="border-color:var(--cdr-brd)">
+        <div class="cc-hd" style="color:var(--cdr)"><span class="cico">📢</span> Reporting-Element</div>
+        <textarea class="canvas-inp" id="cv_report" placeholder="Was wird wie öffentlich berichtet? Welches ESRS-Feld ist relevant?" oninput="autoSave()" style="height:65px"></textarea>
+      </div>
+      <div class="canvas-cell" style="border-color:var(--g-brd)">
+        <div class="cc-hd" style="color:var(--g)"><span class="cico">🔴</span> Rote Linie</div>
+        <textarea class="canvas-inp" id="cv_redline" placeholder="Was ist unter keinen Umständen akzeptabel?" oninput="autoSave()"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><div class="card-icon" style="background:var(--e-bg)">📏</div><div><div class="card-title">KPIs</div><div class="card-sub">Mindestens 2 messbare Indikatoren — konkret, nicht vage</div></div></div>
+    <div id="kpiList"></div>
+    <div class="kpi-add" onclick="addKPI()">+ KPI hinzufügen</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn bc" onclick="gotoTab(6)">Weiter: Stress-Test →</button>
+    <button class="btn bg2" onclick="gotoTab(4)">← Zurück</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════ TAB 6: STRESS TEST ══════════════════════ -->
+<div class="scr" id="tab6">
+<div class="inner">
+  <div class="ph">
+    <div class="ph-badge">◈ Schritt 6 von 7 — Stress-Test</div>
+    <div class="ph-title">Die eigene Lösung <em>angreifen</em></div>
+    <div class="ph-desc">Gute Governance erkennt ihren eigenen Scheiterpunkt mit. Beantwortet die fünf unbequemen Fragen — ehrlich, nicht defensiv.</div>
+  </div>
+  <div class="card" style="background:var(--red-bg);border-color:#e8b0ad">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-size:1.4rem">⚡</span><div><div style="font-family:var(--fd);font-size:1rem;font-weight:600">Fünf Angriffspunkte</div><div style="font-size:.78rem;color:var(--mid)">Je schärfer ihr eure eigene Lösung angreift, desto widerstandsfähiger wird sie im Hearing</div></div></div>
+    <div class="st-q">
+      <div class="st-qnum">Stress-Test 1</div>
+      <div class="st-qtext">Wo könnte eure Lösung bloß symbolisch sein?</div>
+      <div class="st-sub">Was klingt gut, ändert aber nichts? Wo fehlt der Biss?</div>
+      <textarea class="inp" id="st1" rows="3" placeholder="Ehrliche Antwort …" oninput="autoSave()" style="background:var(--white)"></textarea>
+    </div>
+    <div class="st-q">
+      <div class="st-qnum">Stress-Test 2</div>
+      <div class="st-qtext">Wo stößt eure Lösung intern auf Widerstand?</div>
+      <div class="st-sub">Wer im Unternehmen hat Interesse daran, dass diese Steuerung nicht funktioniert?</div>
+      <textarea class="inp" id="st2" rows="3" placeholder="Ehrliche Antwort …" oninput="autoSave()" style="background:var(--white)"></textarea>
+    </div>
+    <div class="st-q">
+      <div class="st-qnum">Stress-Test 3</div>
+      <div class="st-qtext">Welcher eurer KPIs könnte leicht 'bespielt' werden?</div>
+      <div class="st-sub">Welche Kennzahl ist messbar, aber manipulierbar?</div>
+      <textarea class="inp" id="st3" rows="3" placeholder="Ehrliche Antwort …" oninput="autoSave()" style="background:var(--white)"></textarea>
+    </div>
+    <div class="st-q">
+      <div class="st-qnum">Stress-Test 4</div>
+      <div class="st-qtext">Welche Stakeholder-Perspektive habt ihr untergewichtet?</div>
+      <div class="st-sub">Wessen Sichtweise fehlt in eurem Modell?</div>
+      <textarea class="inp" id="st4" rows="3" placeholder="Ehrliche Antwort …" oninput="autoSave()" style="background:var(--white)"></textarea>
+    </div>
+    <div class="st-q">
+      <div class="st-qnum">Stress-Test 5</div>
+      <div class="st-qtext">Wie würde ein Journalist, Investor oder Aktivist eure Lösung angreifen?</div>
+      <div class="st-sub">Formuliert die schärfste mögliche Kritik an eurem Modell.</div>
+      <textarea class="inp" id="st5" rows="3" placeholder="Ehrliche Antwort …" oninput="autoSave()" style="background:var(--white)"></textarea>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><div class="card-icon" style="background:var(--e-bg)">🛡️</div><div><div class="card-title">Überarbeitete Lösung</div><div class="card-sub">Was ändert sich an eurem Governance-Modell nach dem Stress-Test?</div></div></div>
+    <textarea class="inp" id="stImprove" rows="4" placeholder="Was verbessert ihr nach dem Stress-Test? Was bleibt bewusst unverändert — und warum?" oninput="autoSave()"></textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn bc" onclick="gotoTab(7)">Weiter: Board-Entscheidung →</button>
+    <button class="btn bg2" onclick="gotoTab(5)">← Zurück</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════ TAB 7: BOARD ══════════════════════ -->
+<div class="scr" id="tab7">
+<div class="inner">
+  <div class="ph">
+    <div class="ph-badge">◈ Schritt 7 von 7 — Board-Entscheidung</div>
+    <div class="ph-title">Board <em>entscheidet</em></div>
+    <div class="ph-desc">Ihr seid das Steuerungsgremium. Sieben Punkte — klare Beschlüsse. Dann: Präsentationsmodus für das Hearing.</div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-icon" style="background:var(--g-bg)">🔔</div>
+      <div><div class="card-title">Board-Protokoll</div><div class="card-sub">Füllt alle sieben Punkte aus — wie ein echtes Governance-Gremium</div></div>
+    </div>
+    <div class="bd-item">
+      <div class="bd-num">1</div>
+      <div><div class="bd-q">Wird die Praxis fortgeführt, verändert, pausiert oder beendet?</div><div class="bd-hint">Klare Entscheidung mit kurzer Begründung.</div><textarea class="inp" id="bd1" rows="2" placeholder="…" oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="bd-item">
+      <div class="bd-num">2</div>
+      <div><div class="bd-q">Welche Sofortmaßnahmen gelten ab heute?</div><div class="bd-hint">Konkret — was passiert in den nächsten 30 Tagen?</div><textarea class="inp" id="bd2" rows="2" placeholder="…" oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="bd-item">
+      <div class="bd-num">3</div>
+      <div><div class="bd-q">Wer trägt die Hauptverantwortung — Name der Rolle?</div><div class="bd-hint">Eine klare Rolle, nicht ein Gremium.</div><textarea class="inp" id="bd3" rows="2" placeholder="…" oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="bd-item">
+      <div class="bd-num">4</div>
+      <div><div class="bd-q">Welche zwei KPIs gelten ab sofort?</div><div class="bd-hint">Messbar, berichtsreif, nicht manipulierbar.</div><textarea class="inp" id="bd4" rows="2" placeholder="…" oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="bd-item">
+      <div class="bd-num">5</div>
+      <div><div class="bd-q">Welche Information muss an den Vorstand / Aufsichtsrat?</div><div class="bd-hint">Was ist eskalationswürdig?</div><textarea class="inp" id="bd5" rows="2" placeholder="…" oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="bd-item">
+      <div class="bd-num">6</div>
+      <div><div class="bd-q">Welche Information müsste öffentlich belegbar sein?</div><div class="bd-hint">Was könnte in einem CSRD-Bericht stehen?</div><textarea class="inp" id="bd6" rows="2" placeholder="…" oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="bd-item bd-redline">
+      <div class="bd-num" style="background:var(--red)">🔴</div>
+      <div>
+        <div class="bd-q">Wo liegt eure rote Linie?</div>
+        <div class="bd-hint">Was ist unter keinen Umständen akzeptabel — auch nicht für Wachstum oder Effizienz?</div>
+        <textarea class="inp" id="bd7" rows="2" placeholder="Unsere rote Linie: …" oninput="autoSave()" style="border-color:var(--red)"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><div class="card-icon" style="background:var(--bg2)">🎤</div><div><div class="card-title">Hearing-Vorbereitung</div><div class="card-sub">3 Minuten Präsentation — was sind eure fünf Kernpunkte?</div></div></div>
+    <textarea class="inp" id="hearingPitch" rows="4" placeholder="Formuliert eure 3-Minuten-Präsentation: Fall → Wesentlichkeit → Governance → KPIs → Rote Linie" oninput="autoSave()"></textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn bc" onclick="openPresentation()">🎤 Präsentationsmodus starten</button>
+    <button class="btn bg2" onclick="gotoTab(6)">← Zurück</button>
+    <button class="btn be" onclick="exportPDF()">📄 Zusammenfassung exportieren</button>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════ TAB 8: LITERATUR ══════════════════════ -->
+<div class="scr" id="tab8">
+<div class="inner">
+  <div class="ph">
+    <div class="ph-badge">◎ Literatur</div>
+    <div class="ph-title">Quellen &amp; <em>Leseempfehlungen</em></div>
+    <div class="ph-desc">Wissenschaftliche Primärquellen und Standardwerke zu CDR, ESG, CSRD und digitaler Governance — im APA 7-Format.</div>
+  </div>
+  <div class="lit-cluster-hd">01 · Corporate Digital Responsibility (CDR)</div>
+  <div class="lit-entry cdr">
+    <div class="lit-apa">Lobschat, L., Mueller, B., Eggers, F., Brandimarte, L., Diefenbach, S., Kroschke, M., &amp; Wirtz, J. (2021). Corporate digital responsibility. <em>Journal of Business Research, 122</em>, 875–888.</div>
+    <div class="lit-doi"><a href="https://doi.org/10.1016/j.jbusres.2019.10.006" target="_blank" rel="noopener">→ DOI 10.1016/j.jbusres.2019.10.006</a></div>
+    <div class="lit-note">Das Grundlagenwerk für CDR: definiert den Begriff, entwickelt ein Framework für digitale Verantwortung in Unternehmen und zeigt, wie CDR quer durch alle Geschäftsbereiche wirkt.</div>
+  </div>
+  <div class="lit-entry cdr">
+    <div class="lit-apa">Herden, C. J., Alliu, E., Cakici, A., Cech, T., Eggert, L., Falk, S., Hammerla, L., Isaak, A., Kelm, A., Kern, C., Mauer, R., &amp; Pinnow, S. (2021). Corporate digital responsibility: New corporate responsibilities in the digital age. <em>NIM Marketing Intelligence Review, 13</em>(1), 34–39.</div>
+    <div class="lit-doi"><a href="https://doi.org/10.2478/nimmir-2021-0006" target="_blank" rel="noopener">→ DOI 10.2478/nimmir-2021-0006</a></div>
+    <div class="lit-note">Praxisnahe Einführung in CDR: Was bedeutet digitale Verantwortung für Unternehmen im Alltag? Mit konkreten Feldern (Datenpraktiken, Algorithmen, Plattformlogiken) und Managementempfehlungen.</div>
+  </div>
+  <div class="lit-entry cdr">
+    <div class="lit-apa">Mihale-Wilson, C., Hinz, O., van der Aalst, W., &amp; Weinhardt, C. (2022). Corporate digital responsibility. <em>Business &amp; Information Systems Engineering, 64</em>(2), 127–132.</div>
+    <div class="lit-doi"><a href="https://doi.org/10.1007/s12599-022-00746-0" target="_blank" rel="noopener">→ DOI 10.1007/s12599-022-00746-0</a></div>
+    <div class="lit-note">Konzeptuelle Klärung und Abgrenzung: CDR als eigenständiges Konzept jenseits von CSR und Compliance. Zeigt, wo CDR mit anderen Governance-Konzepten überschneidet und wo es darüber hinausgeht.</div>
+  </div>
+
+  <div class="lit-cluster-hd">02 · ESG, CSRD &amp; Berichterstattung</div>
+  <div class="lit-entry e">
+    <div class="lit-apa">European Commission. (2022). <em>Corporate Sustainability Reporting Directive (CSRD)</em>. Directive 2022/2464/EU. Official Journal of the European Union.</div>
+    <div class="lit-doi"><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2464" target="_blank" rel="noopener">→ EUR-Lex: Directive 2022/2464/EU</a></div>
+    <div class="lit-note">Der rechtliche Rahmen: Die CSRD macht Nachhaltigkeitsberichterstattung für große Unternehmen verpflichtend und schließt erstmals auch digitale Praktiken ein. Grundlage für ESRS.</div>
+  </div>
+  <div class="lit-entry e">
+    <div class="lit-apa">EFRAG. (2023). <em>European Sustainability Reporting Standards (ESRS) — Set 1</em>. European Financial Reporting Advisory Group.</div>
+    <div class="lit-doi"><a href="https://www.efrag.org/sustainability-reporting" target="_blank" rel="noopener">→ EFRAG: Sustainability Reporting</a></div>
+    <div class="lit-note">Die technischen Standards unter der CSRD: ESRS geben vor, wie und zu welchen Themen berichtet wird. Relevant für die Frage, welche digitalen Praktiken dokumentationspflichtig werden.</div>
+  </div>
+  <div class="lit-entry e">
+    <div class="lit-apa">European Commission. (2023). <em>Double materiality: Conceptual guidelines for ESRS reporting</em>. European Commission, DG FISMA.</div>
+    <div class="lit-doi"><a href="https://finance.ec.europa.eu/capital-markets-union-and-financial-markets/company-reporting-and-auditing/company-reporting/corporate-sustainability-reporting_en" target="_blank" rel="noopener">→ European Commission: Corporate Sustainability Reporting</a></div>
+    <div class="lit-note">Das Konzept der doppelten Wesentlichkeit: Unternehmen müssen sowohl berichten, wie Nachhaltigkeitsthemen sie betreffen (financial materiality), als auch wie sie selbst auf die Welt wirken (impact materiality).</div>
+  </div>
+
+  <div class="lit-cluster-hd">03 · KI-Ethik, Fairness &amp; Governance</div>
+  <div class="lit-entry g">
+    <div class="lit-apa">Jobin, A., Ienca, M., &amp; Vayena, E. (2019). The global landscape of AI ethics guidelines. <em>Nature Machine Intelligence, 1</em>, 389–399.</div>
+    <div class="lit-doi"><a href="https://doi.org/10.1038/s42256-019-0088-2" target="_blank" rel="noopener">→ DOI 10.1038/s42256-019-0088-2</a></div>
+    <div class="lit-note">Vergleich von über 80 globalen KI-Ethik-Richtlinien: Welche Werte tauchen überall auf? Transparenz und Fairness dominieren — aber deren Operationalisierung ist selten konsistent.</div>
+  </div>
+  <div class="lit-entry g">
+    <div class="lit-apa">Mittelstadt, B. D., Allo, P., Taddeo, M., Wachter, S., &amp; Floridi, L. (2016). The ethics of algorithms: Mapping the debate. <em>Big Data &amp; Society, 3</em>(2).</div>
+    <div class="lit-doi"><a href="https://doi.org/10.1177/2053951716679679" target="_blank" rel="noopener">→ DOI 10.1177/2053951716679679</a></div>
+    <div class="lit-note">Kartierung der ethischen Debatten rund um Algorithmen: Entscheidungsautomatisierung, Diskriminierung, Transparenz und Rechenschaftspflicht. Grundlage für den CDR Risk Radar.</div>
+  </div>
+  <div class="lit-entry g">
+    <div class="lit-apa">O'Neil, C. (2016). <em>Weapons of math destruction: How big data increases inequality and threatens democracy</em>. Crown Publishers.</div>
+    <div class="lit-doi"><a href="https://search.worldcat.org/title/weapons-of-math-destruction/oclc/1004974769" target="_blank" rel="noopener">→ WorldCat OCLC 1004974769</a></div>
+    <div class="lit-note">Zugängliche, praxisnahe Kritik algorithmischer Entscheidungssysteme: Wie automatisierte Scoring-Modelle strukturelle Ungleichheit verstärken — direkt anwendbar auf Fälle wie Workforce Optimization.</div>
+  </div>
+
+  <div class="lit-cluster-hd">04 · Datenpraktiken &amp; Plattformökonomie</div>
+  <div class="lit-entry s">
+    <div class="lit-apa">Zuboff, S. (2019). <em>The age of surveillance capitalism: The fight for a human future at the new frontier of power</em>. PublicAffairs.</div>
+    <div class="lit-doi"><a href="https://search.worldcat.org/title/age-of-surveillance-capitalism/oclc/1121142538" target="_blank" rel="noopener">→ WorldCat OCLC 1121142538</a></div>
+    <div class="lit-note">Plattformen nutzen Verhaltensdaten als wirtschaftlichen Rohstoff — Zuboff analysiert die Machtstrukturen, die durch Datenpraktiken entstehen. Hintergrund für Fälle wie Fan Data Revenue Share.</div>
+  </div>
+  <div class="lit-entry s">
+    <div class="lit-apa">Crawford, K. (2021). <em>Atlas of AI: Power, politics, and the planetary costs of artificial intelligence</em>. Yale University Press.</div>
+    <div class="lit-doi"><a href="https://search.worldcat.org/title/atlas-of-ai/oclc/1247717600" target="_blank" rel="noopener">→ WorldCat OCLC 1247717600</a></div>
+    <div class="lit-note">KI als politisch-ökonomisches System: Crawford zeigt die Ressourcen-, Arbeits- und Machtdimensionen von KI-Infrastruktur — relevant für E- und S-Dimensionen digitaler Unternehmenspraktiken.</div>
+  </div>
+  <div class="lit-entry s">
+    <div class="lit-apa">Srnicek, N. (2017). <em>Platform capitalism</em>. Polity Press.</div>
+    <div class="lit-doi"><a href="https://search.worldcat.org/title/Platform-capitalism/oclc/973870650" target="_blank" rel="noopener">→ WorldCat OCLC 973870650</a></div>
+    <div class="lit-note">Fünf Plattformtypen und ihre Eigenlogiken: Srnicek erklärt, warum Plattformen strukturell auf Datenakkumulation angewiesen sind — und welche Governance-Fragen das aufwirft.</div>
+  </div>
+
+  <div class="lit-cluster-hd">05 · Ergänzende Quellen</div>
+  <div class="lit-entry" style="border-left-color:var(--mid)">
+    <div class="lit-apa">Akerlof, G. A. (1970). The market for "lemons": Quality uncertainty and the market mechanism. <em>Quarterly Journal of Economics, 84</em>(3), 488–500.</div>
+    <div class="lit-doi"><a href="https://doi.org/10.2307/1879431" target="_blank" rel="noopener">→ DOI 10.2307/1879431</a></div>
+    <div class="lit-note">Nobelpreisarbeit: Informationsasymmetrien zerstören Märkte. Direkt relevant für Fälle wie Sustainability Claim Automation und Review-Integrität — wenn Anbieter mehr wissen als Käufer.</div>
+  </div>
+  <div class="lit-entry" style="border-left-color:var(--mid)">
+    <div class="lit-apa">Freeman, R. E. (1984). <em>Strategic management: A stakeholder approach</em>. Pitman Publishing.</div>
+    <div class="lit-note">Das Stakeholder-Modell: Unternehmen sind gegenüber allen Beteiligten rechenschaftspflichtig, nicht nur gegenüber Shareholder:innen. Grundlage für Impact-Materiality-Denken.</div>
+  </div>
+  <div class="lit-entry" style="border-left-color:var(--mid)">
+    <div class="lit-apa">Russell, S. (2019). <em>Human compatible: Artificial intelligence and the problem of control</em>. Viking.</div>
+    <div class="lit-doi"><a href="https://search.worldcat.org/title/human-compatible/oclc/1113410915" target="_blank" rel="noopener">→ WorldCat OCLC 1113410915</a></div>
+    <div class="lit-note">KI-Steuerung als fundamentales Problem: Wie werden KI-Systeme auf menschliche Werte ausgerichtet? Relevant für alle Fälle mit algorithmischer Entscheidungsfindung.</div>
+  </div>
+
+  <div style="text-align:center;margin-top:36px;padding:20px;background:var(--white);border:1px solid var(--brd);border-radius:var(--r)">
+    <div style="font-family:var(--fd);font-size:.78rem;color:var(--mid)">Designed by Prof. Thomas Petzold Ph.D. and Claude · Wirtschafts- und digitale Ethik · 2026</div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════ PRESENTATION MODE ══════════════════════ -->
+<div id="presMode">
+  <button class="pres-close" onclick="closePresentation()">✕ Schließen</button>
+  <div class="pres-inner" id="presContent"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CASES DATA
+// ═══════════════════════════════════════════════
+const CASES=[
+  {id:1,title:'Fan Data Revenue Share',short:'Festival-App-Daten an Sponsor:innen; Erlöse sollen Ticketpreise senken.',
+   desc:'Eine Festival-Plattform verkauft aggregierte App-Nutzungsdaten (Bewegungsprofile, Kaufverhalten, Interessen) an Sponsoring-Partner:innen. Die Erlöse fließen in einen Rabatttopf, der Ticketpreise für die nächste Saison senken soll.',
+   tension:'Wirtschaftliche Logik: Win-Win durch Datenverwertung. Normative Spannung: Wer hat wirklich zugestimmt? Wer profitiert, wer trägt das Risiko?',
+   esg:['S','G'],hints:['Datenschutz','Einwilligung','Transparenz','Fairness der Verteilung']},
+  {id:2,title:'Accessibility Prioritization',short:'Budget reicht nur für bessere mobile Conversion oder barrierefreie Buchungswege.',
+   desc:'Das Produktbudget reicht für entweder (a) eine signifikante Verbesserung der mobilen Conversion-Rate (+18% Umsatz erwartet) oder (b) vollständige Barrierefreiheit der Buchungsstrecke (EU-Accessibiliy-Act-konform). Beides ist nicht finanzierbar.',
+   tension:'Wirtschaftliche Logik: Maximierung des Umsatzes. Normative Spannung: Ausschluss von Nutzer:innen mit Einschränkungen. Governance: EU-Recht ab 2025.',
+   esg:['S','G'],hints:['Inklusion','Regulierung','Priorisierung','Stakeholder-Fairness']},
+  {id:3,title:'Creator Synthetic Upgrade',short:'Reale Creator werden teilweise durch KI-Avatare ergänzt.',
+   desc:'Ein Eventmarketing-Unternehmen ersetzt oder ergänzt reale Micro-Creator durch synthetische KI-Avatare, die deren Stil, Sprache und Bildsprache imitieren. Die Community weiß nicht, ob sie einem Menschen oder einem Avatar folgt.',
+   tension:'Wirtschaftliche Logik: Skalierung ohne Kreativkosten. Normative Spannung: Vertrauenstäuschung, parasoziale Manipulation, Displacement realer Arbeit.',
+   esg:['S','G'],hints:['Disclosure','KI-Transparenz','Arbeit','Vertrauensausbeutung']},
+  {id:4,title:'Sustainability Claim Automation',short:'KI ergänzt tausende Produktseiten mit Nachhaltigkeitsargumenten bei schwankender Datenqualität.',
+   desc:'Ein E-Commerce-Plattform setzt KI ein, um für alle 40.000 Produkte automatisch Nachhaltigkeitsattribute zu generieren (CO₂-Schätzung, Materialherkunft, Zertifikate). Datengrundlage: teils belastbar, teils inferiert, teils unklar.',
+   tension:'Wirtschaftliche Logik: Wettbewerbsvorteil durch Nachhaltigkeitssignale. Normative Spannung: Green Washing-Risiko, Verbrauchertäuschung, Messbarkeitsproblem.',
+   esg:['E','S','G'],hints:['Greenwashing','Datenqualität','Verbraucherschutz','Reporting-Pflicht']},
+  {id:5,title:'Workforce Optimization',short:'Produktivitätsscoring für Freelance-Crews im Eventbetrieb.',
+   desc:'Ein Eventdienstleister setzt ein KI-Scoring-System ein, das Freelancer:innen nach Effizienz, Pünktlichkeit und Kundenfeedback bewertet. Das Score bestimmt Auftragsvergabe und Stundensatz. Das Modell ist für die Beschäftigten nicht einsehbar.',
+   tension:'Wirtschaftliche Logik: Qualitätssicherung durch Incentivierung. Normative Spannung: Algorithmic Management, fehlende Erklärbarkeit, Machtasymmetrie.',
+   esg:['S','G'],hints:['Arbeitsrecht','Transparenz','Diskriminierung','Rechenschaft']},
+  {id:6,title:'Predictive Overbooking',short:'No-Show-Prognosen zur wirtschaftlichen Stabilisierung von Veranstaltungen.',
+   desc:'Eine Event-Buchungsplattform überbucht systematisch 8–12% der Tickets, basierend auf No-Show-Prognosen aus historischen Daten. Wenn zu viele Besucher:innen erscheinen, erhalten Freiwillige eine Kompensation. Nicht-Freiwilligen wird der Einlass verwehrt.',
+   tension:'Wirtschaftliche Logik: Kapazitätsoptimierung, Umsatzsicherung. Normative Spannung: Vertragsverletzung, Fairness, Intransparenz beim Kauf.',
+   esg:['S','G'],hints:['Vertragsrecht','Fairness','Transparenz','Willkürfreiheit']},
+  {id:7,title:'Emotion-Aware CRM',short:'Supportanfragen werden nach emotionaler Dringlichkeit priorisiert.',
+   desc:'Ein digitales CRM-System analysiert den emotionalen Ton von Kundenservice-Anfragen in Echtzeit und priorisiert Eskalationen nach Sentimentwert. Verärgerte oder aufgeregte Kund:innen werden bevorzugt bedient.',
+   tension:'Wirtschaftliche Logik: Reputationsschutz, Churn-Reduktion. Normative Spannung: Manipulation, Ungleichbehandlung, Daten-Bias nach Ausdrucksstil.',
+   esg:['S','G'],hints:['Gleichbehandlung','Bias','Manipulation','Datenschutz']},
+  {id:8,title:'Trust Premium',short:'Verifizierte Händler:innen erhalten bessere Sichtbarkeit; kleine Anbieter haben höhere Hürden.',
+   desc:'Ein Marktplatz führt ein kostenpflichtiges Verifizierungsabzeichen ein (250 €/Jahr), das bessere Suchrankings und Trustsignale bringt. Kleine und neue Anbieter haben systematisch schlechtere Sichtbarkeit, weil ihnen die Ressourcen für Verifikation fehlen.',
+   tension:'Wirtschaftliche Logik: Einnahmequelle + Qualitätssignal. Normative Spannung: Skalierungsungerechtigkeit, Markteintrittsbarrieren, Vertrauen als Ware.',
+   esg:['S','G'],hints:['Marktgerechtigkeit','Fairness','Vertrauen','KMU-Ausschluss']},
+];
+
+// ═══════════════════════════════════════════════
+// RADAR DIMENSIONS
+// ═══════════════════════════════════════════════
+const RADAR_DIMS=[
+  {id:'rd1',label:'Datenschutz / Privacy',desc:'Risiko durch unzureichenden Schutz personenbezogener oder sensibler Daten.'},
+  {id:'rd2',label:'Fairness / Bias',desc:'Risiko durch diskriminierende, verzerrte oder ungerechte algorithmische Entscheidungen.'},
+  {id:'rd3',label:'Transparenz',desc:'Risiko durch fehlende Erklärbarkeit, versteckte Logiken oder unklare Kommunikation.'},
+  {id:'rd4',label:'Manipulation',desc:'Risiko durch Dark Patterns, emotionale Ausnutzung oder Abhängigkeitserzeugung.'},
+  {id:'rd5',label:'Arbeits- & Organisationsfolgen',desc:'Risiko durch Automatisierungsfolgen, Algorithmic Management oder fehlende Arbeitnehmerrechte.'},
+  {id:'rd6',label:'Umwelt / Infrastruktur',desc:'Risiko durch Ressourcenverbrauch, Energienutzung oder digitale Infrastrukturwirkungen.'},
+  {id:'rd7',label:'Kontrolle / Rechenschaft',desc:'Risiko durch fehlende Auditierbarkeit, Eskalationswege oder externe Prüfmöglichkeiten.'},
+];
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let G={selectedCase:null,dmX:0.5,dmY:0.5,kpiCount:2,radarVals:{rd1:1,rd2:1,rd3:1,rd4:1,rd5:1,rd6:1,rd7:1}};
+let saveTimer=null;
+let currentTab=0;
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.onload=function(){
+  renderCases();
+  initRadar();
+  initDM();
+  initKPIs();
+  loadFromStorage();
+};
+
+function toast(msg,col){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.background=col||'var(--ink)';
+  t.style.opacity=1;setTimeout(()=>t.style.opacity=0,1800);
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function gotoTab(n){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('tab'+n).classList.add('on');
+  document.querySelectorAll('.tt').forEach(t=>{
+    const tn=parseInt(t.dataset.tab);
+    t.classList.toggle('active',tn===n);
+    t.classList.toggle('done',tn<n&&tn>0);
+  });
+  currentTab=n;
+  const pct=[0,12,26,40,54,68,80,92,100][n]||0;
+  document.getElementById('progFill').style.width=pct+'%';
+  window.scrollTo(0,0);
+  if(n===3){setTimeout(()=>drawDM(),100);}
+  if(n===4){setTimeout(()=>drawRadar(),100);}
+  if(n===2){updateFramingCase();}
+}
+
+// ═══════════════════════════════════════════════
+// CASES
+// ═══════════════════════════════════════════════
+function renderCases(){
+  const grid=document.getElementById('caseGrid');
+  grid.innerHTML=CASES.map(c=>`
+    <div class="cc${G.selectedCase===c.id?' sel':''}" id="cc${c.id}" onclick="selectCase(${c.id})">
+      <div class="cc-num">${String(c.id).padStart(2,'0')}</div>
+      <div class="cc-title">${c.title}</div>
+      <div class="cc-desc">${c.short}</div>
+      <div class="cc-tags">${c.esg.map(e=>`<span class="ebadge eb-${e.toLowerCase()}">${e}</span>`).join('')}</div>
+    </div>`).join('');
+}
+function selectCase(id){
+  G.selectedCase=id;
+  renderCases();
+  const c=CASES.find(x=>x.id===id);
+  document.getElementById('tnavCase').textContent='Fall '+id+': '+c.title;
+  document.getElementById('caseDetail').style.display='block';
+  document.getElementById('caseDetail').innerHTML=`
+    <div class="card" style="border-color:var(--cdr-brd);background:var(--cdr-bg)">
+      <div class="card-hd">
+        <div class="card-icon" style="background:var(--white);font-size:1.2rem">📂</div>
+        <div><div class="card-title">Fall ${id}: ${c.title}</div><div class="card-sub">${c.esg.map(e=>`<span class="ebadge eb-${e.toLowerCase()}" style="margin-right:4px">${e}</span>`).join('')}</div></div>
+      </div>
+      <div style="font-size:.88rem;color:var(--ink);line-height:1.7;margin-bottom:12px">${c.desc}</div>
+      <div style="background:var(--white);border-radius:7px;padding:14px;border:1px solid var(--brd)">
+        <div style="font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cdr);margin-bottom:6px">⚡ Kernspannung</div>
+        <div style="font-size:.82rem;color:var(--mid);line-height:1.65">${c.tension}</div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="font-family:var(--fm);font-size:.58rem;color:var(--mid)">Analyseschwerpunkte:</span>
+        ${c.hints.map(h=>`<span style="background:var(--bg2);border:1px solid var(--brd);border-radius:4px;padding:2px 8px;font-family:var(--fm);font-size:.58rem;color:var(--mid)">${h}</span>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('caseNextRow').style.display='flex';
+  autoSave();
+}
+function updateFramingCase(){
+  const el=document.getElementById('framingCase');
+  if(!G.selectedCase){el.innerHTML='<div style="color:var(--mid);font-size:.85rem">Noch kein Fall gewählt — <button class="btn bg2" onclick="gotoTab(1)" style="padding:6px 14px;font-size:.58rem">zurück zur Fallauswahl</button></div>';return;}
+  const c=CASES.find(x=>x.id===G.selectedCase);
+  el.innerHTML=`<div style="background:var(--cdr-bg);border:1px solid var(--cdr-brd);border-radius:8px;padding:12px 16px;display:flex;gap:10px;align-items:center"><span style="font-family:var(--fd);font-size:.88rem;font-weight:600">Fall ${c.id}: ${c.title}</span>${c.esg.map(e=>`<span class="ebadge eb-${e.toLowerCase()}">${e}</span>`).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════
+// DOUBLE MATERIALITY
+// ═══════════════════════════════════════════════
+function initDM(){
+  const cv=document.getElementById('dmCanvas');
+  cv.addEventListener('mousedown',dmClick);
+  cv.addEventListener('touchstart',e=>{e.preventDefault();const r=cv.getBoundingClientRect();const t=e.touches[0];G.dmX=(t.clientX-r.left)/r.width;G.dmY=1-(t.clientY-r.top)/r.height;G.dmX=Math.max(0,Math.min(1,G.dmX));G.dmY=Math.max(0,Math.min(1,G.dmY));drawDM();autoSave();},{passive:false});
+}
+function dmClick(e){
+  const cv=document.getElementById('dmCanvas');const r=cv.getBoundingClientRect();
+  G.dmX=(e.clientX-r.left)/r.width;G.dmY=1-(e.clientY-r.top)/r.height;
+  G.dmX=Math.max(0,Math.min(1,G.dmX));G.dmY=Math.max(0,Math.min(1,G.dmY));
+  drawDM();autoSave();
+}
+function drawDM(){
+  const cv=document.getElementById('dmCanvas');
+  if(!cv.parentElement)return;
+  const S=Math.min(cv.parentElement.offsetWidth,480);
+  cv.width=S;cv.height=S;
+  const ctx=cv.getContext('2d');const pad=40;
+  const W=S,H=S;
+  ctx.clearRect(0,0,W,H);
+  // quadrant backgrounds
+  const mid=[W/2,H/2];
+  const qa=[['rgba(239,250,244,.9)','rgba(232,241,251,.9)'],['rgba(243,237,251,.9)','rgba(253,243,232,.9)']];
+  [[0,0],[1,0],[0,1],[1,1]].forEach(([qi,qj])=>{
+    ctx.fillStyle=qa[qi][qj];ctx.fillRect(W/2*qj,H/2*qi,W/2,H/2);
+  });
+  // grid
+  ctx.strokeStyle='rgba(0,0,0,.06)';ctx.lineWidth=1;
+  for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(pad+i*(W-2*pad)/4,pad);ctx.lineTo(pad+i*(W-2*pad)/4,H-pad);ctx.stroke();}
+  for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(pad,pad+i*(H-2*pad)/4);ctx.lineTo(W-pad,pad+i*(H-2*pad)/4);ctx.stroke();}
+  // axes
+  ctx.strokeStyle='rgba(0,0,0,.18)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad,H/2);ctx.lineTo(W-pad,H/2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W/2,pad);ctx.lineTo(W/2,H-pad);ctx.stroke();
+  // axis labels
+  ctx.font='11px DM Mono,monospace';ctx.fillStyle='#6b6257';ctx.textAlign='center';
+  ctx.fillText('FINANZIELLE WESENTLICHKEIT →',W/2,H-10);
+  ctx.save();ctx.translate(12,H/2);ctx.rotate(-Math.PI/2);ctx.fillText('IMPACT-WESENTLICHKEIT →',0,0);ctx.restore();
+  ctx.font='9px DM Mono,monospace';ctx.fillStyle='rgba(107,98,87,.5)';
+  ctx.textAlign='left';ctx.fillText('niedrig',pad+4,H-pad+12);
+  ctx.textAlign='right';ctx.fillText('hoch',W-pad-4,H-pad+12);
+  // quadrant labels
+  ctx.font='9px DM Mono,monospace';ctx.fillStyle='rgba(107,98,87,.4)';
+  ctx.textAlign='center';
+  ctx.fillText('NIEDRIG / NIEDRIG',W/4,H*3/4+14);
+  ctx.fillText('HOCH / NIEDRIG',W*3/4,H*3/4+14);
+  ctx.fillText('NIEDRIG / HOCH',W/4,H/4+14);
+  ctx.fillText('HOCH / HOCH',W*3/4,H/4+14);
+  // point
+  const px=pad+(W-2*pad)*G.dmX;const py=H-pad-(H-2*pad)*G.dmY;
+  // glow
+  ctx.beginPath();ctx.arc(px,py,18,0,Math.PI*2);
+  const grad=ctx.createRadialGradient(px,py,2,px,py,18);
+  grad.addColorStop(0,'rgba(196,118,42,.3)');grad.addColorStop(1,'rgba(196,118,42,0)');
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();ctx.arc(px,py,8,0,Math.PI*2);
+  ctx.fillStyle='var(--cdr)';ctx.fill();
+  ctx.strokeStyle='white';ctx.lineWidth=2.5;ctx.stroke();
+  // case label
+  if(G.selectedCase){
+    const c=CASES.find(x=>x.id===G.selectedCase);
+    const lx=px>W/2?px-12:px+12;const ly=py>H/2?py-16:py+22;
+    ctx.font='bold 10px DM Sans,sans-serif';ctx.fillStyle='var(--ink)';
+    ctx.textAlign=px>W/2?'right':'left';
+    ctx.fillText('Fall '+c.id,lx,ly);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// RISK RADAR
+// ═══════════════════════════════════════════════
+function initRadar(){
+  const ctrl=document.getElementById('radarControls');
+  ctrl.innerHTML=RADAR_DIMS.map(d=>`
+    <div class="rc-row">
+      <span class="rc-lbl" title="${d.desc}">${d.label}</span>
+      <input type="range" class="rc-slider" id="sl_${d.id}" min="1" max="5" value="1" oninput="updateRadar()" style="accent-color:var(--cdr)">
+      <span class="rc-val" id="rv_${d.id}">1</span>
+    </div>`).join('');
+  const reasons=document.getElementById('radarReasons');
+  reasons.innerHTML=RADAR_DIMS.map(d=>`
+    <div class="frow">
+      <label class="lbl" for="rr_${d.id}">${d.label} — Begründung</label>
+      <textarea class="inp" id="rr_${d.id}" rows="2" placeholder="${d.desc}" oninput="autoSave()"></textarea>
+    </div>`).join('');
+  drawRadar();
+}
+function updateRadar(){
+  RADAR_DIMS.forEach(d=>{
+    const v=parseInt(document.getElementById('sl_'+d.id).value);
+    G.radarVals[d.id]=v;
+    document.getElementById('rv_'+d.id).textContent=v;
+    document.getElementById('rv_'+d.id).style.color=v>=4?'var(--red)':v>=3?'var(--cdr)':'var(--e)';
+  });
+  drawRadar();updateRadarSummary();autoSave();
+}
+function drawRadar(){
+  const cv=document.getElementById('radarCanvas');if(!cv)return;
+  const S=300;cv.width=S;cv.height=S;
+  const ctx=cv.getContext('2d');const cx=S/2,cy=S/2,R=110,n=RADAR_DIMS.length;
+  ctx.clearRect(0,0,S,S);
+  // grid rings
+  [1,2,3,4,5].forEach(ring=>{
+    ctx.beginPath();
+    for(let i=0;i<=n;i++){const a=i/n*Math.PI*2-Math.PI/2;const r=R*ring/5;ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);}
+    ctx.closePath();ctx.strokeStyle=ring===5?'rgba(0,0,0,.12)':'rgba(0,0,0,.06)';ctx.lineWidth=ring===5?1.5:1;ctx.stroke();
+  });
+  // spokes + labels
+  RADAR_DIMS.forEach((d,i)=>{
+    const a=i/n*Math.PI*2-Math.PI/2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+    ctx.strokeStyle='rgba(0,0,0,.1)';ctx.lineWidth=1;ctx.stroke();
+    const lx=cx+Math.cos(a)*(R+20),ly=cy+Math.sin(a)*(R+20);
+    ctx.font='8.5px DM Mono,monospace';ctx.fillStyle='#6b6257';ctx.textAlign='center';
+    const words=d.label.split('/')[0].trim();ctx.fillText(words,lx,ly);
+  });
+  // data polygon
+  ctx.beginPath();
+  RADAR_DIMS.forEach((d,i)=>{
+    const a=i/n*Math.PI*2-Math.PI/2;const r=R*(G.radarVals[d.id]||1)/5;
+    i===0?ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+  });
+  ctx.closePath();
+  ctx.fillStyle='rgba(196,118,42,.18)';ctx.fill();
+  ctx.strokeStyle='var(--cdr)';ctx.lineWidth=2;ctx.stroke();
+  // dots
+  RADAR_DIMS.forEach((d,i)=>{
+    const a=i/n*Math.PI*2-Math.PI/2;const r=R*(G.radarVals[d.id]||1)/5;
+    const v=G.radarVals[d.id]||1;
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,4,0,Math.PI*2);
+    ctx.fillStyle=v>=4?'var(--red)':v>=3?'var(--cdr)':'var(--e)';ctx.fill();
+  });
+}
+function updateRadarSummary(){
+  const vals=Object.values(G.radarVals);
+  const avg=(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
+  const max=Math.max(...vals);const dim=RADAR_DIMS[vals.indexOf(max)];
+  const level=avg>=4?['Kritisches Risikoprofil','var(--red)','var(--red-bg)']:avg>=3?['Erhöhtes Risikoprofil','var(--cdr)','var(--cdr-bg)']:['Moderates Risikoprofil','var(--e)','var(--e-bg)'];
+  document.getElementById('radarSummary').innerHTML=`
+    <div style="background:${level[2]};border-radius:7px;padding:12px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <span style="font-family:var(--fd);font-size:1rem;font-weight:600;color:${level[1]}">${level[0]}</span>
+      <span style="font-family:var(--fm);font-size:.62rem;color:var(--mid)">Ø Score: <strong style="color:${level[1]}">${avg}/5</strong></span>
+      <span style="font-family:var(--fm);font-size:.62rem;color:var(--mid)">Höchstes Risiko: <strong style="color:${level[1]}">${dim.label} (${max}/5)</strong></span>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════
+// KPI BUILDER
+// ═══════════════════════════════════════════════
+function initKPIs(){renderKPIs();}
+function renderKPIs(){
+  const list=document.getElementById('kpiList');
+  list.innerHTML='';
+  for(let i=1;i<=G.kpiCount;i++){
+    const row=document.createElement('div');row.className='kpi-row';
+    row.innerHTML=`<span class="kpi-num">${i}</span><input class="inp kpi-inp" id="kpi_${i}" type="text" placeholder="KPI ${i}: z.B. Anteil transparenter Preis-Disclosures ≥ 95% innerhalb 12 Monaten" oninput="autoSave()" value="${loadKPIVal(i)}">`;
+    list.appendChild(row);
+  }
+}
+function loadKPIVal(i){try{const d=JSON.parse(localStorage.getItem('cdrWorkbench')||'{}');return d['kpi_'+i]||'';}catch{return '';}}
+function addKPI(){G.kpiCount++;renderKPIs();}
+
+// ═══════════════════════════════════════════════
+// AUTO SAVE
+// ═══════════════════════════════════════════════
+function autoSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    const data={selectedCase:G.selectedCase,dmX:G.dmX,dmY:G.dmY,radarVals:G.radarVals,kpiCount:G.kpiCount};
+    const fields=['f1','f2','f3','f4','f5','f6','f7','fconclusion',
+      'esg_e','esg_s','esg_g','qual_datenbasiert','qual_annahmenbasiert','qual_unsicher','esgReason',
+      'cv_policy','cv_role','cv_audit','cv_esc','cv_stake','cv_report','cv_redline',
+      'st1','st2','st3','st4','st5','stImprove',
+      'bd1','bd2','bd3','bd4','bd5','bd6','bd7','hearingPitch'];
+    fields.forEach(id=>{const el=document.getElementById(id);if(el)data[id]=el.value;});
+    for(let i=1;i<=G.kpiCount;i++){const el=document.getElementById('kpi_'+i);if(el)data['kpi_'+i]=el.value;}
+    const pr=document.querySelector('input[name="esgPrimary"]:checked');if(pr)data.esgPrimary=pr.value;
+    RADAR_DIMS.forEach(d=>{const el=document.getElementById('rr_'+d.id);if(el)data['rr_'+d.id]=el.value;});
+    localStorage.setItem('cdrWorkbench',JSON.stringify(data));
+    const ind=document.getElementById('saveInd');ind.style.opacity=1;setTimeout(()=>ind.style.opacity=0,1200);
+  },600);
+}
+
+function loadFromStorage(){
+  try{
+    const data=JSON.parse(localStorage.getItem('cdrWorkbench')||'{}');
+    if(data.selectedCase){G.selectedCase=data.selectedCase;renderCases();
+      const c=CASES.find(x=>x.id===G.selectedCase);
+      if(c){document.getElementById('tnavCase').textContent='Fall '+c.id+': '+c.title;
+        document.getElementById('caseNextRow').style.display='flex';selectCase(c.id);}
+    }
+    if(data.dmX!==undefined){G.dmX=data.dmX;G.dmY=data.dmY;}
+    if(data.radarVals){G.radarVals=data.radarVals;}
+    if(data.kpiCount){G.kpiCount=data.kpiCount;renderKPIs();}
+    const fields=['f1','f2','f3','f4','f5','f6','f7','fconclusion',
+      'esg_e','esg_s','esg_g','qual_datenbasiert','qual_annahmenbasiert','qual_unsicher','esgReason',
+      'cv_policy','cv_role','cv_audit','cv_esc','cv_stake','cv_report','cv_redline',
+      'st1','st2','st3','st4','st5','stImprove',
+      'bd1','bd2','bd3','bd4','bd5','bd6','bd7','hearingPitch'];
+    fields.forEach(id=>{const el=document.getElementById(id);if(el&&data[id])el.value=data[id];});
+    for(let i=1;i<=G.kpiCount;i++){const el=document.getElementById('kpi_'+i);if(el&&data['kpi_'+i])el.value=data['kpi_'+i];}
+    if(data.esgPrimary){const r=document.querySelector(`input[name="esgPrimary"][value="${data.esgPrimary}"]`);if(r)r.checked=true;}
+    RADAR_DIMS.forEach(d=>{const el=document.getElementById('rr_'+d.id);if(el&&data['rr_'+d.id])el.value=data['rr_'+d.id];
+      const sl=document.getElementById('sl_'+d.id);if(sl&&G.radarVals[d.id]){sl.value=G.radarVals[d.id];const rv=document.getElementById('rv_'+d.id);if(rv)rv.textContent=G.radarVals[d.id];}
+    });
+    updateRadarSummary();
+    if(data.selectedCase)toast('Stand geladen ✓','var(--e)');
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════════════
+// PRESENTATION MODE
+// ═══════════════════════════════════════════════
+function openPresentation(){
+  const data=JSON.parse(localStorage.getItem('cdrWorkbench')||'{}');
+  const c=G.selectedCase?CASES.find(x=>x.id===G.selectedCase):null;
+  const kpis=[];for(let i=1;i<=G.kpiCount;i++){const v=data['kpi_'+i];if(v)kpis.push(v);}
+  const radarTop=RADAR_DIMS.map(d=>({label:d.label,val:G.radarVals[d.id]||1})).sort((a,b)=>b.val-a.val).slice(0,3);
+
+  document.getElementById('presContent').innerHTML=`
+    <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:18px">CDR Workbench · Hearing-Präsentation</div>
+    ${c?`<div class="pres-case-title">Fall ${c.id}:<br><strong>${c.title}</strong></div>
+    <div style="display:flex;gap:8px;margin:10px 0 24px">${c.esg.map(e=>`<span class="ebadge eb-${e.toLowerCase()}">${e}</span>`).join('')}</div>`:'<div class="pres-case-title">Kein Fall gewählt</div>'}
+    <div class="pres-section">
+      <div class="pres-section-hd">◈ Fall-Beschreibung</div>
+      <div style="font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.7">${c?c.desc:''}</div>
+    </div>
+    <div class="pres-section">
+      <div class="pres-section-hd">◈ Framing — Die eigentliche Managementfrage</div>
+      <div style="font-family:var(--fd);font-size:1.1rem;color:var(--cdr);font-style:italic;line-height:1.6">${data.fconclusion||'–'}</div>
+    </div>
+    <div class="pres-section">
+      <div class="pres-section-hd">◈ Wesentlichkeitsprofil</div>
+      <div class="pres-grid">
+        <div class="pres-box"><div class="pres-box-hd" style="color:#aecbef">Financial Materiality</div><div class="pres-text">${data.esg_s||'–'}</div></div>
+        <div class="pres-box"><div class="pres-box-hd" style="color:#c9b3e8">Impact Materiality</div><div class="pres-text">${data.esg_g||'–'}</div></div>
+      </div>
+      <div style="margin-top:10px;font-family:var(--fm);font-size:.6rem;color:rgba(255,255,255,.4)">Primäre ESG-Kategorie: ${data.esgPrimary||'–'}</div>
+    </div>
+    <div class="pres-section">
+      <div class="pres-section-hd">◈ Top-Risiken (CDR Risk Radar)</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${radarTop.map(r=>`<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:10px 14px;font-family:var(--fm);font-size:.62rem"><span style="color:${r.val>=4?'var(--red)':r.val>=3?'var(--cdr)':'var(--e)'}">●</span> ${r.label} — <strong style="color:rgba(255,255,255,.9)">${r.val}/5</strong></div>`).join('')}</div>
+    </div>
+    <div class="pres-section">
+      <div class="pres-section-hd">◈ Governance-Modell</div>
+      <div class="pres-grid">
+        <div class="pres-box"><div class="pres-box-hd" style="color:var(--cdr)">Leitlinie</div><div class="pres-text">${data.cv_policy||'–'}</div></div>
+        <div class="pres-box"><div class="pres-box-hd" style="color:#c9b3e8">Verantwortliche Rolle</div><div class="pres-text">${data.cv_role||'–'}</div></div>
+        <div class="pres-box"><div class="pres-box-hd" style="color:#aecbef">Audit &amp; Kontrolle</div><div class="pres-text">${data.cv_audit||'–'}</div></div>
+        <div class="pres-box"><div class="pres-box-hd" style="color:#b5dfc9">Eskalationsweg</div><div class="pres-text">${data.cv_esc||'–'}</div></div>
+      </div>
+    </div>
+    <div class="pres-section">
+      <div class="pres-section-hd">◈ KPIs</div>
+      ${kpis.map((k,i)=>`<div class="pres-kpi-row"><div class="pres-kpi-dot"></div><div style="font-size:.88rem;color:rgba(255,255,255,.8)">${k}</div></div>`).join('')||'<div style="color:rgba(255,255,255,.4);font-size:.85rem">Keine KPIs definiert</div>'}
+    </div>
+    <div class="pres-section">
+      <div class="pres-section-hd">◈ Board-Entscheidung</div>
+      <div class="pres-grid">
+        <div class="pres-box"><div class="pres-box-hd" style="color:rgba(255,255,255,.5)">Entscheidung zur Praxis</div><div class="pres-text">${data.bd1||'–'}</div></div>
+        <div class="pres-box"><div class="pres-box-hd" style="color:rgba(255,255,255,.5)">Sofortmaßnahmen</div><div class="pres-text">${data.bd2||'–'}</div></div>
+      </div>
+      ${data.bd7?`<div class="pres-rdline"><div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(192,57,43,.8);margin-bottom:6px">🔴 Rote Linie</div><div style="font-size:.88rem;color:rgba(255,255,255,.8)">${data.bd7}</div></div>`:''}
+    </div>
+    <div style="text-align:center;padding:24px 0;border-top:1px solid rgba(255,255,255,.08);font-family:var(--fm);font-size:.58rem;color:rgba(255,255,255,.25)">Designed by Prof. Thomas Petzold Ph.D. and Claude · CDR Workbench · 2026</div>`;
+  document.getElementById('presMode').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closePresentation(){document.getElementById('presMode').style.display='none';document.body.style.overflow='';}
+
+// ═══════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════
+function exportPDF(){
+  toast('Tipp: Nutzt Strg+P / Cmd+P für den Druck- oder PDF-Export des Präsentationsmodus.','var(--s)');
+  openPresentation();
+}
+
+// Resize handling
+window.addEventListener('resize',()=>{if(currentTab===3)drawDM();if(currentTab===4)drawRadar();});
+</script>
+</body>
+</html>
