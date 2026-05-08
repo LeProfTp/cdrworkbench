@@ -1089,7 +1089,7 @@ function addKPI(){G.kpiCount++;renderKPIs();}
 function autoSave(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(()=>{
-    const data={selectedCase:G.selectedCase,dmX:G.dmX,dmY:G.dmY,radarVals:G.radarVals,kpiCount:G.kpiCount};
+    const data={selectedCase:G.selectedCase,dmX:G.dmX,dmY:G.dmY,radarVals:G.radarVals,kpiCount:G.kpiCount,currentTab:currentTab};
     const fields=['f1','f2','f3','f4','f5','f6','f7','fconclusion',
       'esg_e','esg_s','esg_g','qual_datenbasiert','qual_annahmenbasiert','qual_unsicher','esgReason',
       'cv_policy','cv_role','cv_audit','cv_esc','cv_stake','cv_report','cv_redline',
@@ -1128,6 +1128,7 @@ function loadFromStorage(){
     });
     updateRadarSummary();
     if(data.selectedCase)toast('Stand geladen ✓','var(--e)');
+    if(data.currentTab>0) setTimeout(()=>gotoTab(data.currentTab),200);
   }catch(e){}
 }
 
